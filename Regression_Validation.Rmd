@@ -1,0 +1,109 @@
+---
+title: "ise533_p3_group2"
+author: "Jinhu Qi"
+date: "11/25/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# read the dataset
+
+#View(df)
+```{r}
+df <- read.csv("Advertising.csv")
+```
+
+#split data
+```{r}
+a <- seq(1, 100, by=1)
+b <- seq(101, 200, by=1)
+train <- df[a,]
+valid <- df[b,]
+max(df['TV'])
+max(df['Radio'])
+min(df['TV'])
+min(df['Radio'])
+```
+
+# we use training set in implement our regression
+```{r}
+model <- lm(train$Sales~train$TV+train$Radio)
+summary(model)
+```
+
+# we have beta0 = 3.14699, beta1 = 0.04585 and beta2 = 0.18412
+# this gonna be our cofficents in later caculation.
+```{r}
+b0 = 3.14699
+b1 = 0.04585
+b2 = 0.18412
+```
+
+# now calculate error in both training and valid set
+```{r}
+ev = replicate(100, 0)
+ei = replicate(100, 0)
+for (i in 1:100)
+{
+  ev[i] = valid$Sales[i]-b0-b1*valid$TV[i]-b2*valid$Radio[i]
+}
+for (i in 1:100){
+  ei[i] = train$Sales[i]-b0-b1*train$TV[i]-b2*train$Radio[i]
+}
+```
+
+
+
+```{r}
+print(toString(round(ei,3)))
+```
+
+#then we do the F-test
+```{r}
+F_test = var.test(ev, ei, alternative = "two.sided")
+F_test
+```
+
+# not reject H0
+# draw q-q plot
+```{r}
+qqnorm(ev, pch = 1, frame = FALSE)
+qqnorm(ei, pch = 1, frame = FALSE)
+```
+```{r}
+boxplot(ev)
+boxplot(ei)
+```
+
+
+
+# detect outlier and delete from data set
+```{r}
+# validation set:
+which.min(ev)
+ev[31]
+valid <- valid[-which.min(ev),]
+dim(valid)
+
+# training set
+which.min(ei)
+ei[which.min(ei)]
+train <- train[-which.min(ei),]
+dim(train)
+
+which.min(ei)
+ei[which.min(ei)]
+train <- train[-which.min(ei),]
+dim(train)
+
+which.min(ei)
+ei[which.min(ei)]
+train <- train[-which.min(ei),]
+dim(train)
+
+ei[6]
+```
+
